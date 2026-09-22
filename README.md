@@ -41,7 +41,7 @@ Requirements: Docker with Compose.
 docker compose up --build
 ```
 
-- Demo UI: http://localhost:3000
+- Demo UI: http://localhost:3001
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - Health: http://localhost:8080/actuator/health
 
