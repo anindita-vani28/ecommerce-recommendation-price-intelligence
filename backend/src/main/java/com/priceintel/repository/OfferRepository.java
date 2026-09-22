@@ -12,4 +12,6 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
 
     List<Offer> findByRetailerNameIgnoreCaseAndAvailabilityTrueAndLastSeenAtBefore(
             String retailerName, Instant cutoff);
+
+    List<Offer> findByProductIdAndCountryCodeIgnoreCaseAndAvailabilityTrue(Long productId, String countryCode);
 }

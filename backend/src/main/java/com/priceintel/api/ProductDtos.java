@@ -27,4 +27,12 @@ public final class ProductDtos {
 
     public record PriceHistoryResponse(
             Long offerId, String retailer, String currency, List<PricePoint> history) implements Serializable {}
+
+    public enum DealVerdict { INSUFFICIENT_HISTORY, HISTORICAL_LOW, GREAT_DEAL, GOOD_DEAL, FAIR_PRICE, ABOVE_TYPICAL }
+
+    public record DealInsightResponse(
+            Long productId, Long offerId, String retailer, String currency, int windowDays,
+            BigDecimal currentPrice, BigDecimal medianPrice, BigDecimal lowestPrice, BigDecimal highestPrice,
+            double discountFromMedianPercentage, double volatilityPercentage, int sampleSize,
+            DealVerdict verdict, String explanation) implements Serializable {}
 }

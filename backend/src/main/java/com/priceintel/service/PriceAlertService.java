@@ -36,9 +36,10 @@ public class PriceAlertService {
 
     private AlertView view(PriceAlert alert) {
         return new AlertView(alert.getId(), alert.getProduct().getId(), alert.getProduct().getName(),
-                alert.getCountryCode(), alert.getTargetPrice(), alert.getChannel(), alert.isActive(), alert.getCreatedAt());
+                alert.getCountryCode(), alert.getTargetPrice(), alert.getChannel(), alert.isActive(),
+                alert.getCreatedAt(), alert.getLastTriggeredAt());
     }
 
     public record AlertView(Long id, Long productId, String product, String country, BigDecimal targetPrice,
-                            String channel, boolean active, Instant createdAt) {}
+                            String channel, boolean active, Instant createdAt, Instant lastTriggeredAt) {}
 }

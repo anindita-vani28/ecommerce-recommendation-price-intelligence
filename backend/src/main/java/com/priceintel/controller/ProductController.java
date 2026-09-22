@@ -2,6 +2,7 @@ package com.priceintel.controller;
 
 import com.priceintel.api.ProductDtos.*;
 import com.priceintel.service.ProductQueryService;
+import com.priceintel.service.DealInsightService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.*;
 import org.springframework.validation.annotation.Validated;
@@ -13,7 +14,11 @@ import java.util.List;
 @RequestMapping("/api/products")
 public class ProductController {
     private final ProductQueryService products;
-    public ProductController(ProductQueryService products) { this.products = products; }
+    private final DealInsightService deals;
+    public ProductController(ProductQueryService products, DealInsightService deals) {
+        this.products = products;
+        this.deals = deals;
+    }
 
     @GetMapping("/search")
     @Operation(summary = "Search the catalog in a country market")
@@ -35,5 +40,12 @@ public class ProductController {
     public PriceHistoryResponse priceHistory(@PathVariable Long productId, @PathVariable Long offerId,
             @RequestParam(defaultValue = "30") @Min(1) @Max(365) int days) {
         return products.priceHistory(productId, offerId, days);
+    }
+
+    @GetMapping("/{productId}/offers/{offerId}/deal-insight")
+    @Operation(summary = "Evaluate whether the current offer is a true deal")
+    public DealInsightResponse dealInsight(@PathVariable Long productId, @PathVariable Long offerId,
+            @RequestParam(defaultValue = "90") @Min(7) @Max(365) int days) {
+        return deals.insight(productId, offerId, days);
     }
 }

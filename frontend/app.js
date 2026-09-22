@@ -53,7 +53,15 @@ async function loadRecommendation() {
         <div class="offer-meta">incl. shipping</div>
       </div>
     </div>`).join('');
-  await loadHistory(best.offerId);
+  await Promise.all([loadHistory(best.offerId), loadDealInsight(best.offerId, best.explanation)]);
+}
+
+async function loadDealInsight(offerId, rankingReasons) {
+  const insight = await api(`/api/products/${state.productId}/offers/${offerId}/deal-insight?days=90`);
+  $('dealVerdict').textContent = insight.verdict.replaceAll('_', ' ');
+  const dealReason = `${insight.explanation} (${insight.sampleSize} observations, median ${money(insight.medianPrice, insight.currency)}).`;
+  $('explanation-list').innerHTML = [...rankingReasons, dealReason]
+    .map(reason => `<li>${escapeHtml(reason)}</li>`).join('');
 }
 
 async function loadHistory(offerId) {

@@ -15,6 +15,8 @@ The stronger version of this idea is not another shopping search engine. It is a
 - Redis-backed search/recommendation caching
 - Scheduled, idempotent retailer ingestion through a replaceable adapter SPI
 - Price-change snapshots, stale-offer retirement, adapter failure isolation, and ingestion metrics
+- Statistical deal verdicts using rolling median, observed lows, and price volatility
+- Concurrent-safe alert evaluation with a durable notification outbox
 - RFC 9457-style error responses, validation, Actuator, and OpenAPI
 - Minimal frontend using the real APIs
 - Multi-stage Docker images, Compose stack, tests, and GitHub Actions CI
@@ -65,6 +67,8 @@ curl 'http://localhost:8080/api/products/search?query=headphones&country=US'
 curl 'http://localhost:8080/api/products/101/recommendations?country=US'
 
 curl 'http://localhost:8080/api/products/101/offers/1001/price-history?days=30'
+
+curl 'http://localhost:8080/api/products/101/offers/1001/deal-insight?days=90'
 ```
 
 Demo authentication (local development only):
@@ -83,6 +87,18 @@ Trigger all enabled retailer adapters manually with the same token:
 curl -X POST http://localhost:8080/api/admin/ingestion/refresh \
   -H 'Authorization: Bearer <token>'
 ```
+
+Alert evaluation runs automatically after ingestion and can also be invoked independently:
+
+```bash
+curl -X POST http://localhost:8080/api/admin/alerts/evaluate \
+  -H 'Authorization: Bearer <token>'
+
+curl http://localhost:8080/api/notifications \
+  -H 'Authorization: Bearer <token>'
+```
+
+Triggered alerts are one-shot and concurrency-safe: the alert is deactivated and one `PENDING` outbox event is stored in the same transaction. A later email/push delivery adapter can process that event without risking lost or duplicate notifications.
 
 Docker Compose enables a deterministic demo adapter. It updates the seeded Amazon headphone offer once, records the changed price, and is idempotent on later runs. Real adapters are disabled until their API credentials and terms are configured.
 
@@ -120,14 +136,14 @@ cd backend
 mvn verify
 ```
 
-The suite covers ranking behavior, full Spring context startup, idempotent offer imports, price-change snapshots, and stale-offer retirement. GitHub Actions runs the same verification on pushes and pull requests.
+The suite covers ranking behavior, full Spring context startup, idempotent offer imports, price-change snapshots, stale-offer retirement, statistical deal classification, and alert/outbox behavior. GitHub Actions runs the same verification on pushes and pull requests.
 
 ## Roadmap
 
 1. Add one legitimate public or affiliate retailer API adapter with timeout, retry/backoff, rate limiting, and WireMock contract tests.
 2. Build product identity matching across retailers using GTIN/UPC plus normalized brand/model features.
-3. Add “true deal” detection using rolling median, volatility, and lowest-price windows.
-4. Move user identity to PostgreSQL and add OAuth2/OIDC; deliver alerts through an outbox-backed notification worker.
+3. Add an email/push delivery worker for pending outbox events with retries and dead-letter handling.
+4. Move user identity to PostgreSQL and add OAuth2/OIDC.
 5. Add Testcontainers integration tests, load tests, Prometheus/Grafana dashboards, and tracing.
 6. Add currency conversion, tax/duty estimates, and regional availability for genuine cross-border landed-cost ranking.
 

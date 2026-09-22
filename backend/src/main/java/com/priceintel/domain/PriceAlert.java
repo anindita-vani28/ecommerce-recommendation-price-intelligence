@@ -33,6 +33,8 @@ public class PriceAlert {
     @Column(nullable = false)
     private Instant createdAt;
 
+    private Instant lastTriggeredAt;
+
     public Long getId() { return id; }
     public Product getProduct() { return product; }
     public void setProduct(Product product) { this.product = product; }
@@ -48,4 +50,6 @@ public class PriceAlert {
     public void setActive(boolean active) { this.active = active; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public Instant getLastTriggeredAt() { return lastTriggeredAt; }
+    public void setLastTriggeredAt(Instant lastTriggeredAt) { this.lastTriggeredAt = lastTriggeredAt; }
 }

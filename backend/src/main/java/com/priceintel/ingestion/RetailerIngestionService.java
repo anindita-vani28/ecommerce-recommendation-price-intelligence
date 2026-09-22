@@ -1,6 +1,7 @@
 package com.priceintel.ingestion;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import com.priceintel.service.AlertEvaluationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -16,15 +17,18 @@ public class RetailerIngestionService {
     private final List<RetailerCatalogAdapter> adapters;
     private final OfferImportService importer;
     private final MeterRegistry metrics;
+    private final AlertEvaluationService alertEvaluation;
 
     public RetailerIngestionService(List<RetailerCatalogAdapter> adapters,
-                                    OfferImportService importer, MeterRegistry metrics) {
+                                    OfferImportService importer, MeterRegistry metrics,
+                                    AlertEvaluationService alertEvaluation) {
         this.adapters = adapters;
         this.importer = importer;
         this.metrics = metrics;
+        this.alertEvaluation = alertEvaluation;
     }
 
-    @CacheEvict(cacheNames = {"product-search", "recommendations"}, allEntries = true)
+    @CacheEvict(cacheNames = {"product-search", "recommendations", "deal-insights"}, allEntries = true)
     public IngestionReport refreshAll() {
         Instant startedAt = Instant.now();
         List<OfferImportService.ImportResult> results = new ArrayList<>();
@@ -44,11 +48,13 @@ public class RetailerIngestionService {
                 metrics.counter("priceintel.ingestion.failure", "retailer", adapter.retailerName()).increment();
             }
         }
-        return new IngestionReport(startedAt, Instant.now(), List.copyOf(results), List.copyOf(failures));
+        var alerts = alertEvaluation.evaluateActiveAlerts();
+        return new IngestionReport(startedAt, Instant.now(), List.copyOf(results), List.copyOf(failures), alerts);
     }
 
     public record AdapterFailure(String retailer, String message) {}
     public record IngestionReport(Instant startedAt, Instant completedAt,
                                   List<OfferImportService.ImportResult> imports,
-                                  List<AdapterFailure> failures) {}
+                                  List<AdapterFailure> failures,
+                                  AlertEvaluationService.EvaluationReport alertEvaluation) {}
 }
