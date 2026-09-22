@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: price-intel-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/price_intel}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      repositories:
+        enabled: false
+  cache:
+    type: redis
+    redis:
+      time-to-live: 5m
+  flyway:
+    enabled: true
+
+price-intel:
+  jwt:
+    secret: ${JWT_SECRET:local-development-secret-change-me-before-production-123456789}
+    ttl: 12h
+  ranking:
+    price-weight: 0.45
+    trust-weight: 0.20
+    delivery-weight: 0.15
+    popularity-weight: 0.10
+    deal-weight: 0.10
+  refresh:
+    fixed-delay: ${PRICE_REFRESH_DELAY:15m}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  port: 8080

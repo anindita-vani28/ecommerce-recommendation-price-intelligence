@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Price Intel</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Cross-border commerce intelligence</p>
+          <h1>Price Intel</h1>
+        </div>
+        <div class="country-picker">
+          <label for="countrySelect">Country</label>
+          <select id="countrySelect">
+            <option value="US">United States</option>
+            <option value="DE">Germany</option>
+            <option value="UK">United Kingdom</option>
+            <option value="IN">India</option>
+          </select>
+        </div>
+      </header>
+
+      <section class="search-panel card">
+        <div class="search-input-wrap">
+          <input id="searchInput" type="text" value="headphones" placeholder="Search product or category" />
+          <button id="searchBtn">Search</button>
+        </div>
+      </section>
+
+      <main class="dashboard">
+        <section class="product-spotlight card">
+          <div class="product-header">
+            <div>
+              <p class="eyebrow muted">Recommended product</p>
+              <h2 id="product-name">Noise Cancelling Headphones</h2>
+            </div>
+            <span class="badge success">Top recommendation</span>
+          </div>
+
+          <div class="summary-grid">
+            <div>
+              <label>Best price</label>
+              <strong id="best-price">$149.99</strong>
+            </div>
+            <div>
+              <label>Retailer trust</label>
+              <strong id="trust-score">91/100</strong>
+            </div>
+            <div>
+              <label>Delivery</label>
+              <strong id="delivery-time">2 days</strong>
+            </div>
+          </div>
+
+          <div class="recommendation-box">
+            <h3>Why this ranking wins</h3>
+            <ul id="explanation-list"></ul>
+          </div>
+        </section>
+
+        <section class="chart-panel card">
+          <div class="panel-header">
+            <h3>Price history</h3>
+            <button class="ghost-btn">30d view</button>
+          </div>
+          <canvas id="priceChart" width="560" height="220"></canvas>
+        </section>
+
+        <section class="offers-panel card">
+          <div class="panel-header">
+            <h3>Buying options</h3>
+            <button class="ghost-btn">Compare</button>
+          </div>
+          <div id="offers-list" class="offers-list"></div>
+        </section>
+
+        <section class="watchlist-panel card">
+          <div class="panel-header">
+            <h3>Watchlist</h3>
+            <button id="addAlertBtn" class="ghost-btn">Add alert</button>
+          </div>
+          <ul id="watchlist" class="watchlist"></ul>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

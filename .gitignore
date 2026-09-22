@@ -1,0 +1,19 @@
+# Java / Maven
+/backend/target/
+/backend/.idea/
+/backend/.classpath
+/backend/.project
+/backend/.settings/
+
+# Node / frontend
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.cache/
+/.vscode/
+
+# OS / editor
+.DS_Store
+*.log
+
+# Local modernization/tooling artifacts
+/.github/modernize/
