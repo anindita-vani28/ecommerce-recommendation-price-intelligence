@@ -28,6 +28,7 @@ services:
       DB_PASSWORD: postgres
       REDIS_HOST: redis
       JWT_SECRET: local-compose-secret-change-in-production-123456789012345
+      DEMO_RETAILER_ENABLED: "true"
     ports: ["8080:8080"]
     depends_on:
       postgres: { condition: service_healthy }

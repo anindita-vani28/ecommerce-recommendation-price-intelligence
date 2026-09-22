@@ -25,4 +25,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             where p.id = :id and upper(o.countryCode) = upper(:country)
             """)
     Optional<Product> findInMarket(@Param("id") Long id, @Param("country") String country);
+
+    Optional<Product> findBySlug(String slug);
 }

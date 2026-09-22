@@ -39,6 +39,9 @@ price-intel:
     deal-weight: 0.10
   refresh:
     fixed-delay: ${PRICE_REFRESH_DELAY:15m}
+  ingestion:
+    stale-after: ${OFFER_STALE_AFTER:24h}
+    demo-enabled: ${DEMO_RETAILER_ENABLED:false}
 
 management:
   endpoints:

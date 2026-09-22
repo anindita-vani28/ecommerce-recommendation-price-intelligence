@@ -23,7 +23,7 @@ public class SecurityConfig {
     @Bean
     UserDetailsService users(PasswordEncoder encoder) {
         return new InMemoryUserDetailsManager(User.withUsername("demo@priceintel.dev")
-                .password(encoder.encode("demo-password")).roles("USER").build());
+                .password(encoder.encode("demo-password")).roles("USER", "ADMIN").build());
     }
 
     @Bean AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/products/**", "/swagger-ui/**",
                                 "/swagger-ui.html", "/v3/api-docs/**", "/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

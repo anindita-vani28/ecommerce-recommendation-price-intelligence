@@ -13,7 +13,8 @@ The stronger version of this idea is not another shopping search engine. It is a
 - Price-history API
 - JWT login and owner-scoped alert endpoints
 - Redis-backed search/recommendation caching
-- Scheduled price-refresh boundary ready for retailer adapters
+- Scheduled, idempotent retailer ingestion through a replaceable adapter SPI
+- Price-change snapshots, stale-offer retirement, adapter failure isolation, and ingestion metrics
 - RFC 9457-style error responses, validation, Actuator, and OpenAPI
 - Minimal frontend using the real APIs
 - Multi-stage Docker images, Compose stack, tests, and GitHub Actions CI
@@ -25,10 +26,10 @@ Browser -> Nginx -> Spring Boot REST API
                          |-- PostgreSQL (source of truth + price history)
                          |-- Redis (query and ranking cache)
                          |-- Ranking engine (configurable weighted-v1)
-                         `-- Scheduled ingestion -> retailer adapters (next milestone)
+                         `-- Scheduled ingestion -> retailer adapter SPI
 ```
 
-The domain and ranking service do not depend on a retailer API. Future Amazon, Best Buy, MediaMarkt, or affiliate-feed integrations should implement adapter interfaces and publish normalized offers into the same catalog.
+The domain and ranking service do not depend on a retailer API. Amazon, Best Buy, MediaMarkt, or affiliate-feed integrations implement `RetailerCatalogAdapter` and publish normalized batches into the same catalog. Each retailer batch is transactional, while failures remain isolated between adapters.
 
 ## Run the complete stack
 
@@ -76,6 +77,15 @@ curl -X POST http://localhost:8080/api/auth/login \
 
 Use the returned token as `Authorization: Bearer <token>` for `/api/alerts`.
 
+Trigger all enabled retailer adapters manually with the same token:
+
+```bash
+curl -X POST http://localhost:8080/api/admin/ingestion/refresh \
+  -H 'Authorization: Bearer <token>'
+```
+
+Docker Compose enables a deterministic demo adapter. It updates the seeded Amazon headphone offer once, records the changed price, and is idempotent on later runs. Real adapters are disabled until their API credentials and terms are configured.
+
 ## Recommendation model
 
 `weighted-v1` scores each available offer from five explainable signals:
@@ -100,6 +110,8 @@ Important environment variables:
 | `REDIS_HOST`, `REDIS_PORT` | Redis connection |
 | `JWT_SECRET` | HMAC signing key; must be replaced outside local development |
 | `PRICE_REFRESH_DELAY` | Scheduled refresh delay, for example `15m` |
+| `OFFER_STALE_AFTER` | Grace period before an unseen offer is retired |
+| `DEMO_RETAILER_ENABLED` | Enables the deterministic development adapter |
 
 ## Tests and CI
 
@@ -108,17 +120,16 @@ cd backend
 mvn verify
 ```
 
-The suite currently covers ranking behavior and full Spring context startup. GitHub Actions runs the same verification on pushes and pull requests.
+The suite covers ranking behavior, full Spring context startup, idempotent offer imports, price-change snapshots, and stale-offer retirement. GitHub Actions runs the same verification on pushes and pull requests.
 
 ## Roadmap
 
-1. Define a retailer adapter SPI and add a deterministic mock adapter plus one legitimate public/affiliate API integration.
-2. Add idempotent ingestion, retry/backoff, rate limits, stale-offer handling, and cache invalidation.
-3. Build product identity matching across retailers using GTIN/UPC plus normalized brand/model features.
-4. Add “true deal” detection using rolling median, volatility, and lowest-price windows.
-5. Move user identity to PostgreSQL and add OAuth2/OIDC; deliver alerts through an outbox-backed notification worker.
-6. Add Testcontainers integration tests, WireMock contract tests, load tests, Prometheus/Grafana dashboards, and tracing.
-7. Add currency conversion, tax/duty estimates, and regional availability for genuine cross-border landed-cost ranking.
+1. Add one legitimate public or affiliate retailer API adapter with timeout, retry/backoff, rate limiting, and WireMock contract tests.
+2. Build product identity matching across retailers using GTIN/UPC plus normalized brand/model features.
+3. Add “true deal” detection using rolling median, volatility, and lowest-price windows.
+4. Move user identity to PostgreSQL and add OAuth2/OIDC; deliver alerts through an outbox-backed notification worker.
+5. Add Testcontainers integration tests, load tests, Prometheus/Grafana dashboards, and tracing.
+6. Add currency conversion, tax/duty estimates, and regional availability for genuine cross-border landed-cost ranking.
 
 ## Repository layout
 

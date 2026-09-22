@@ -3,6 +3,7 @@ package com.priceintel.domain;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Entity
 @Table(name = "offers", uniqueConstraints = @UniqueConstraint(
@@ -52,6 +53,9 @@ public class Offer {
 
     @Column(nullable = false, length = 1000)
     private String productUrl;
+
+    @Column(nullable = false)
+    private Instant lastSeenAt;
 
     public Long getId() {
         return id;
@@ -148,4 +152,8 @@ public class Offer {
     public String getProductUrl() { return productUrl; }
 
     public void setProductUrl(String productUrl) { this.productUrl = productUrl; }
+
+    public Instant getLastSeenAt() { return lastSeenAt; }
+
+    public void setLastSeenAt(Instant lastSeenAt) { this.lastSeenAt = lastSeenAt; }
 }
